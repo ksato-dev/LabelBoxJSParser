@@ -5,6 +5,10 @@ json_load = json.load(json_open)
 num_json_data = len(json_load)
 print("num data:", num_json_data)
 
+prj_name = json_load[0]["Project Name"]
+print("project name:", prj_name)
+print()
+
 for curr_json in json_load:
     # curr_json = json_load[j_id]
     labeled_data = curr_json["Labeled Data"]
@@ -20,6 +24,5 @@ for curr_json in json_load:
         print(curr_obj["line"])
 
     print()
-
 
 # print(json_load)
