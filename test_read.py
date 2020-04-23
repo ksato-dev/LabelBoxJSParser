@@ -1,5 +1,6 @@
 import json
-json_open = open("labelbox_data.json", "r")
+# json_open = open("labelbox_data.json", "r")
+json_open = open("clips_001.json", "r")
 json_load = json.load(json_open)
 
 num_json_data = len(json_load)
@@ -9,7 +10,12 @@ prj_name = json_load[0]["Project Name"]
 print("project name:", prj_name)
 print()
 
-for curr_json in json_load:
+for index, curr_json in enumerate(json_load):
+    if ("objects" in curr_json["Label"]) == False:
+        continue
+
+    print("ID:", index)
+    
     # curr_json = json_load[j_id]
     labeled_data = curr_json["Labeled Data"]
     temp_fname1 = labeled_data.rsplit(".png?")[0]
@@ -18,8 +24,9 @@ for curr_json in json_load:
     print("source file name:", src_fname)
 
     objects = curr_json["Label"]["objects"]
+
     num_objs = len(objects)
-    # print(num_objs)
+    print("num objects:", num_objs)
     for curr_obj in objects:
         print(curr_obj["line"])
 
