@@ -9,10 +9,7 @@ print("num data:", num_json_data)
 
 prj_name = json_load[0]["Project Name"]
 print("project name:", prj_name)
-print()
 
-# fy_all = list(range(num_pts - 1))
-# fy_all = list(range(num_json_data))
 fy_all = []
 
 ## for offset
@@ -24,7 +21,6 @@ for index, curr_json in enumerate(json_load):
         continue
 
     # print("ID:", index)
-
     src_fname = curr_json["External ID"]
     ds_name = curr_json["Dataset Name"]
     # print("source file name:", src_fname)
@@ -32,14 +28,11 @@ for index, curr_json in enumerate(json_load):
     ## parse annotational lines in current image. ##
     objects = curr_json["Label"]["objects"]
     num_objs = len(objects)
-    # print("num objects:", num_objs)
 
     fy_objs = list(range(num_objs))
-    # fy_all[index] = (fy_objs)
 
     for obj_id, curr_obj in enumerate(objects):
         curr_lines = curr_obj["line"]
-        # print("line no.", obj_id)
 
         num_pts = len(curr_lines)
 
@@ -68,9 +61,7 @@ for index, curr_json in enumerate(json_load):
 
             before_point = curr_point
 
-        # fy_all[index][obj_id] = fy
         fy_objs[obj_id] = fy
-        # print(fy_all[index][obj_id][0])
 
     clips_root_dir = prj_name.split("_", 1)[-1]
     clips_data_dir = ds_name.rsplit("_", 1)[-1]
@@ -81,35 +72,43 @@ for index, curr_json in enumerate(json_load):
 num_imgs = len(fy_all)
 print(num_imgs)
 
+## prepare to write json for lanenet.
+out_json_str = ""
+
 ## y-data for input 
 s_y = 200
-e_y = 710
+e_y = 720
 h_samples = np.arange(s_y, e_y, 10)
 
 for fname, fy_objs in fy_all:
-    # for pl_id, fy_polyline in enumerate(fy_objs):
-    # fy_objs = fy_all[im_id]
-    # print(type(fy_objs))
-    print(fname)
-    # print(fy_objs)
-    # num_objs = len(fy_objs)
+    curr_dict = {}
+    lines_list = []
     for fy_polylines in fy_objs:
         w_samples = np.full(h_samples.shape[0], -2)
         # print(fy_polylines)
         for curr_fy, range_y in fy_polylines:
     #         msg = "[{0:d}][{1:d}][{2:d}]".format(im_id, -1, f_id)
     #         # print(msg)
-            print(curr_fy)
-            print(range_y)
-            range_h = (range_y[0] < h_samples) & (h_samples <= range_y[1])
-            curr_h_samples = h_samples[range_h]
-            curr_w_samples = curr_fy(curr_h_samples)
-            print(curr_h_samples)
+            # print(curr_fy)
+            # print(range_y)
+            curr_range = (range_y[0] < h_samples) & (h_samples <= range_y[1])
+            curr_h_samples = h_samples[curr_range]
+            w_samples[curr_range] = curr_fy(curr_h_samples)
+            # print(curr_h_samples)
 
-            ## TODO: 頭打ち
-            print(np.round(curr_w_samples))
+        ## TODO: 1280 で頭打ち
+        # print(h_samples)
+        # print(np.round(w_samples))
+        # print()
+        lines_list.append(np.round(w_samples).tolist())
+    
+    curr_dict["lines"] = lines_list
+    curr_dict["h_samples"] = h_samples.tolist()
+    curr_dict["raw_file"] = fname
 
-    print()
+    out_json_str = out_json_str + "\n" + str(json.dumps(curr_dict))
 
-
-# print(json_load)
+## prepare to write json for lanenet.
+with open("./label_data_test.json", "w") as out_file:
+    out_file.write(out_json_str[1:])
+#    json.dump(out_dict, out_file, indent=2)
