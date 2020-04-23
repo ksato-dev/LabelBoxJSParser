@@ -20,12 +20,9 @@ for index, curr_json in enumerate(json_load):
         continue
 
     print("ID:", index)
-    
-    # curr_json = json_load[j_id]
-    labeled_data = curr_json["Labeled Data"]
-    temp_fname1 = labeled_data.rsplit(".png?")[0]
-    temp_fname2 = temp_fname1.rsplit("-")[-1]
-    src_fname = temp_fname2 + ".png"
+
+    src_fname = curr_json["External ID"]
+    ds_name = curr_json["Dataset Name"]
     # print("source file name:", src_fname)
 
     ## parse annotational lines in current image. ##
@@ -70,7 +67,12 @@ for index, curr_json in enumerate(json_load):
         # fy_all[index][obj_id] = fy
         fy_objs[obj_id] = fy
         # print(fy_all[index][obj_id][0])
-    fy_all.append((src_fname, fy_objs))
+
+    clips_root_dir = prj_name.split("_", 1)[-1]
+    clips_data_dir = ds_name.rsplit("_", 1)[-1]
+    # src_path = prj_name + "/" + ds_name + "/" + src_fname
+    src_path = clips_root_dir + "/" + clips_data_dir + "/" + src_fname
+    fy_all.append((src_path, fy_objs))
 
 num_imgs = len(fy_all)
 print(num_imgs)
